@@ -1,0 +1,25 @@
+# herdr-plugin.toml — grep-nvim
+#
+# Live-grep the repo with fzf + ripgrep and open the match in nvim, in a split
+# beside your work. This is a PURE-SHELL plugin: no compiled binary and no
+# [[build]] step, so installing never needs a toolchain.
+id = "grep-nvim"
+name = "grep-nvim"
+version = "0.1.0"
+description = "Live-grep the repo with fzf + ripgrep and open the match in nvim, in a split beside your work."
+min_herdr_version = "0.7.0"
+platforms = ["linux", "macos"]
+
+# The action that summons the picker. herdr actions run a `command`; there is no
+# declarative "open this pane at the repo cwd" field, so open.sh does it via the
+# herdr CLI: read the focused pane's cwd from HERDR_PLUGIN_CONTEXT_JSON, split that
+# pane to the right AT that cwd, and run the fzf+ripgrep picker in the new pane.
+#
+# Bind a key to it in your herdr config (see README), or invoke it directly:
+#   herdr plugin action invoke grep-nvim.open
+[[actions]]
+id = "open"
+title = "grep → nvim (split)"
+description = "Live-grep with fzf + ripgrep; open the selected match in nvim in a split-right pane."
+contexts = ["pane", "workspace"]
+command = ["bash", "scripts/open.sh"]
