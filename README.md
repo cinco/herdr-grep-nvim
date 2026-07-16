@@ -8,6 +8,8 @@ exact line. Quit nvim (or press Esc) and the split closes itself.
 It never edits your files and runs nothing on its own — it only opens an editor on
 the file you pick.
 
+**Repo:** <https://github.com/cinco/herdr-grep-nvim> · install with `herdr plugin install cinco/herdr-grep-nvim` · [issues & PRs welcome](https://github.com/cinco/herdr-grep-nvim/issues)
+
 ## Requirements
 
 - **herdr ≥ 0.7.0** (the plugin system)
@@ -20,7 +22,7 @@ the file you pick.
 ## Install
 
 ```bash
-herdr plugin install <owner>/grep-nvim
+herdr plugin install cinco/herdr-grep-nvim
 ```
 
 That registers the `grep-nvim.open` action. Then **bind a key** in your herdr config
@@ -73,7 +75,7 @@ Pure shell — no compiled binary, no build step:
 ## Development
 
 ```bash
-herdr plugin link /path/to/grep-nvim          # use this checkout directly (skips build)
+herdr plugin link /path/to/herdr-grep-nvim    # use this checkout directly (skips build)
 herdr plugin action list --plugin grep-nvim
 herdr plugin action invoke grep-nvim.open
 herdr plugin log list --plugin grep-nvim      # see stderr from the action
@@ -81,11 +83,13 @@ herdr plugin log list --plugin grep-nvim      # see stderr from the action
 
 ## Publishing
 
-herdr's marketplace has no review queue. To list this on
-<https://herdr.dev/plugins/>: push to a **public GitHub repo** with this
-`herdr-plugin.toml`, add the GitHub **topic `herdr-plugin`**, and the index picks it
-up on its next refresh (~30 min). Users then install with
-`herdr plugin install <owner>/grep-nvim`.
+This plugin lives at <https://github.com/cinco/herdr-grep-nvim> and carries the GitHub
+topic **`herdr-plugin`**, so herdr's marketplace (<https://herdr.dev/plugins/>) indexes
+it automatically — there is no review queue, and the index refreshes ~every 30 min.
+
+Forking it? To list your own copy: push a **public GitHub repo** containing
+`herdr-plugin.toml`, add the topic **`herdr-plugin`**, and install it with
+`herdr plugin install <your-user>/<your-repo>`.
 
 ## License
 
