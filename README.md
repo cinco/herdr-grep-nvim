@@ -21,6 +21,9 @@ the file you pick.
 - **[bat](https://github.com/sharkdp/bat)** — *optional*, for a syntax-highlighted preview (falls back to plain text)
 - **Linux or macOS**
 
+Your pane shell can be **bash, zsh, or fish** — the plugin's scripts run under `bash`
+(via their shebang) regardless of your login shell, so nothing here is shell-specific.
+
 ## Install
 
 ```bash
