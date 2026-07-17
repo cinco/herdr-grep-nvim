@@ -18,6 +18,7 @@ H="${HERDR_BIN_PATH:-herdr}"
 DIRECTION="${GREP_NVIM_DIRECTION:-right}"   # right | down
 
 command -v jq >/dev/null 2>&1 || { printf 'grep-nvim: jq not found on PATH\n' >&2; exit 127; }
+command -v "$H" >/dev/null 2>&1 || { printf 'grep-nvim: herdr CLI not found (set HERDR_BIN_PATH or add herdr to PATH)\n' >&2; exit 127; }
 
 # Where to grep: the focused pane's shell cwd (the repo you are working in).
 cwd=""
@@ -30,20 +31,28 @@ if [ -z "$cwd" ]; then
 fi
 [ -n "$cwd" ] || { printf 'grep-nvim: no workspace context (run this from inside herdr)\n' >&2; exit 1; }
 
+# The picker path is required and comes from herdr; fail clearly if it is missing
+# rather than aborting cryptically under `set -u`.
+if [ -z "${HERDR_PLUGIN_ROOT:-}" ]; then
+  printf 'grep-nvim: HERDR_PLUGIN_ROOT is not set (run this as a herdr plugin action)\n' >&2
+  exit 1
+fi
+script="$HERDR_PLUGIN_ROOT/scripts/fzf-grep-nvim.sh"
+
 # Split the focused pane. A bare split inherits the foreground process cwd, so we
 # pass --cwd explicitly. We also seed the new pane with the picker's path as an env
 # var ($GREP_NVIM_SCRIPT), so the command we type into it references the variable
 # rather than echoing the absolute path (which would briefly flash your home path in
 # the pane before fzf takes over). Prefer the injected pane id; fall back to --current.
-script="$HERDR_PLUGIN_ROOT/scripts/fzf-grep-nvim.sh"
-target="${HERDR_PANE_ID:-}"
-if [ -n "$target" ]; then
-  split_json=$("$H" pane split "$target" --direction "$DIRECTION" --cwd "$cwd" --env "GREP_NVIM_SCRIPT=$script" --focus 2>/dev/null)
+# stderr is NOT swallowed, so a real split failure surfaces in `herdr plugin log`.
+if [ -n "${HERDR_PANE_ID:-}" ]; then
+  set -- "$HERDR_PANE_ID"
 else
-  split_json=$("$H" pane split --current --direction "$DIRECTION" --cwd "$cwd" --env "GREP_NVIM_SCRIPT=$script" --focus 2>/dev/null)
+  set -- --current
 fi
+split_json=$("$H" pane split "$@" --direction "$DIRECTION" --cwd "$cwd" --env "GREP_NVIM_SCRIPT=$script" --focus)
 pane=$(printf '%s' "$split_json" | jq -r '.result.pane.pane_id // empty' 2>/dev/null)
-[ -n "$pane" ] || { printf 'grep-nvim: failed to open the split pane\n' >&2; exit 1; }
+[ -n "$pane" ] || { printf 'grep-nvim: failed to open the split pane (see `herdr plugin log list --plugin grep-nvim`)\n' >&2; exit 1; }
 
 # Run the picker in the new pane. `exec` replaces the pane shell, so the pane closes
 # by itself when the picker/editor exits. Referencing $GREP_NVIM_SCRIPT (not the

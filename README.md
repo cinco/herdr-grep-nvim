@@ -61,7 +61,7 @@ herdr pane):
 
 | Variable | Default | Effect |
 | --- | --- | --- |
-| `GREP_NVIM_EDITOR` | `nvim` | Editor to open the match. Must accept `+LINE file` (vim/nvim). |
+| `GREP_NVIM_EDITOR` | `nvim` | Editor to open the match. Must accept `+LINE -- file` (vim/nvim); may include args, e.g. `nvim -u NONE`. |
 | `GREP_NVIM_RG_FLAGS` | *(none)* | Extra ripgrep flags, e.g. `--hidden -g '!.git'` or `-t py`. |
 | `GREP_NVIM_DIRECTION` | `right` | Split direction: `right` or `down`. |
 
@@ -71,11 +71,12 @@ Pure shell — no compiled binary, no build step:
 
 - `herdr-plugin.toml` declares one action, `open`.
 - `scripts/open.sh` reads the focused pane's cwd from `HERDR_PLUGIN_CONTEXT_JSON`,
-  splits that pane (`herdr pane split --cwd <repo> --direction right --focus`), and
-  runs the picker in the new pane via `herdr pane run "<pane>" "bash …; exit"`.
+  splits that pane (`herdr pane split --cwd <repo> --env GREP_NVIM_SCRIPT=… --focus`),
+  then `exec`s the picker in the new pane so quitting the editor closes the pane.
 - `scripts/fzf-grep-nvim.sh` runs `fzf --disabled` with a `change:reload` bind that
-  re-runs `rg` per keystroke, and `enter:become(nvim {1} +{2})` to open the pick.
-  (`rg --column` output is `path:line:col:text`, so `{1}`=file, `{2}`=line.)
+  re-runs `rg` per keystroke. On Enter, fzf prints the selected `path:line:col:text`
+  line; the script recovers the path and line in the shell (robust to colons in the
+  path) and `exec`s the editor at that line.
 
 ## Development
 
