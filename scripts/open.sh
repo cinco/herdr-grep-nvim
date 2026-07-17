@@ -31,18 +31,22 @@ fi
 [ -n "$cwd" ] || { printf 'grep-nvim: no workspace context (run this from inside herdr)\n' >&2; exit 1; }
 
 # Split the focused pane. A bare split inherits the foreground process cwd, so we
-# pass --cwd explicitly. Prefer the injected pane id; fall back to --current.
+# pass --cwd explicitly. We also seed the new pane with the picker's path as an env
+# var ($GREP_NVIM_SCRIPT), so the command we type into it references the variable
+# rather than echoing the absolute path (which would briefly flash your home path in
+# the pane before fzf takes over). Prefer the injected pane id; fall back to --current.
+script="$HERDR_PLUGIN_ROOT/scripts/fzf-grep-nvim.sh"
 target="${HERDR_PANE_ID:-}"
 if [ -n "$target" ]; then
-  split_json=$("$H" pane split "$target" --direction "$DIRECTION" --cwd "$cwd" --focus 2>/dev/null)
+  split_json=$("$H" pane split "$target" --direction "$DIRECTION" --cwd "$cwd" --env "GREP_NVIM_SCRIPT=$script" --focus 2>/dev/null)
 else
-  split_json=$("$H" pane split --current --direction "$DIRECTION" --cwd "$cwd" --focus 2>/dev/null)
+  split_json=$("$H" pane split --current --direction "$DIRECTION" --cwd "$cwd" --env "GREP_NVIM_SCRIPT=$script" --focus 2>/dev/null)
 fi
 pane=$(printf '%s' "$split_json" | jq -r '.result.pane.pane_id // empty' 2>/dev/null)
 [ -n "$pane" ] || { printf 'grep-nvim: failed to open the split pane\n' >&2; exit 1; }
 
-# Run the picker in the new pane. The trailing `; exit` closes the pane when the
-# picker/editor exits. `; exit` is portable across bash/zsh/fish pane shells.
-script="$HERDR_PLUGIN_ROOT/scripts/fzf-grep-nvim.sh"
+# Run the picker in the new pane. `exec` replaces the pane shell, so the pane closes
+# by itself when the picker/editor exits. Referencing $GREP_NVIM_SCRIPT (not the
+# literal path) keeps the transient command line free of your home path.
 sleep 0.5   # let the new shell initialize before we send it a command
-"$H" pane run "$pane" "bash \"$script\"; exit"
+"$H" pane run "$pane" 'exec bash "$GREP_NVIM_SCRIPT"'

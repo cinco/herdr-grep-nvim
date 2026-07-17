@@ -8,6 +8,8 @@ exact line. Quit nvim (or press Esc) and the split closes itself.
 It never edits your files and runs nothing on its own — it only opens an editor on
 the file you pick.
 
+![grep-nvim in action: live-grep the repo with fzf + ripgrep in a herdr split pane, then open the match in nvim at the line](assets/demo.gif)
+
 **Repo:** <https://github.com/cinco/herdr-grep-nvim> · install with `herdr plugin install cinco/herdr-grep-nvim` · [issues & PRs welcome](https://github.com/cinco/herdr-grep-nvim/issues)
 
 ## Requirements

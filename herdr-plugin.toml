@@ -5,7 +5,7 @@
 # [[build]] step, so installing never needs a toolchain.
 id = "grep-nvim"
 name = "grep-nvim"
-version = "1.0.0"
+version = "1.0.1"
 description = "Live-grep the repo with fzf + ripgrep and open the match in nvim, in a split beside your work."
 min_herdr_version = "0.7.0"
 platforms = ["linux", "macos"]
