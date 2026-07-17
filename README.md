@@ -61,7 +61,7 @@ herdr pane):
 
 | Variable | Default | Effect |
 | --- | --- | --- |
-| `GREP_NVIM_EDITOR` | `nvim` | Editor to open the match. Must accept `+LINE -- file` (vim/nvim); may include args, e.g. `nvim -u NONE`. |
+| `GREP_NVIM_EDITOR` | `nvim` | Editor to open the match. Must accept `+LINE -- file` (vim/nvim). Word-split like `$EDITOR`, so it may include args (e.g. `nvim -u NONE`); a binary path containing spaces needs a wrapper. |
 | `GREP_NVIM_RG_FLAGS` | *(none)* | Extra ripgrep flags, e.g. `--hidden -g '!.git'` or `-t py`. |
 | `GREP_NVIM_DIRECTION` | `right` | Split direction: `right` or `down`. |
 

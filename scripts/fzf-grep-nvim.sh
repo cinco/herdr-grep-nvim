@@ -22,7 +22,7 @@ set -uo pipefail
 export PATH="/opt/homebrew/bin:/usr/local/bin:${HOME:-}/.local/bin:/usr/bin:/bin:${PATH:-}"
 
 EDITOR_CMD="${GREP_NVIM_EDITOR:-nvim}"
-editor_bin=${EDITOR_CMD%% *}   # first word, so a multi-word editor still preflights its binary
+editor_bin=${EDITOR_CMD%% *}   # GREP_NVIM_EDITOR is word-split (like $EDITOR); preflight its first word
 
 # Preflight: fail with a clear, visible message if a required tool is missing.
 missing=()
@@ -62,10 +62,13 @@ sel=$(
 )
 [ -n "$sel" ] || exit 0
 
-# Recover the path and line even when the path itself contains colons: strip the
-# trailing :line:col:text (line and col are numeric) instead of splitting every ':'.
+# rg --column output is `path:line:col:text`. Recover the path with a colon-robust
+# strip of the trailing :line:col:text, then take the line as the first field right
+# after that path — so a match whose TEXT contains a :num:num: run cannot hijack the
+# line number, and path and line always derive from the same boundary.
 file=$(printf '%s' "$sel" | sed -E 's/:[0-9]+:[0-9]+:.*$//')
-line=$(printf '%s' "$sel" | sed -E 's/^.*:([0-9]+):[0-9]+:.*$/\1/')
+rest=${sel#"$file":}
+line=${rest%%:*}
 
 # `--` guards a filename beginning with '-'; $EDITOR_CMD is left unquoted so a
 # multi-word GREP_NVIM_EDITOR (e.g. "nvim -u NONE") splits into words.
